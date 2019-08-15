@@ -23,22 +23,7 @@
                         <th class="text-center">操作</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- <tr>
-                    <td class="text-center"><input type="checkbox"></td>
-                    <td class="text-center">133</td>
-                    <td class="text-center">li</td>
-                    <td class="text-center">style-one</td>
-                    <td class="text-center">-</td>
-                    <td class="text-center">2019-07-06 12:29:24</td>
-                    <td class="text-center">18</td>
-                    <td class="text-center">
-                        <i title="编辑" class="fa fa-pencil-square-o" aria-hidden="true"></i>
-                        <i title="删除" class="fa fa-trash-o" aria-hidden="true"></i>
-                    </td>
-                </tr>
-                 -->
-                </tbody>
+                <tbody></tbody>
             </table>
         </div>
         <!-- 分页 -->
@@ -120,8 +105,6 @@
         category: [],
         //当前操作类型：新增或修改
         option: '发布',
-        //当前点击的对象的id
-        currentId: '',
         //当前info-action中select选中的栏目id
         currentCId: '',
         // 当前修改的对象
@@ -288,8 +271,6 @@
     }
     // 通过栏目id加载对应的文章信息
     function findArticle(CId) {
-        /* //清空tbody中的内容
-         $('tbody').remove();*/
         var obj = {
             page: 0,
             //会影响state.total的个数，比如若此处pageSize为2，即使总数据有6个，也只会显示两个，所以为了让数据全部展示出来，应该尽量大

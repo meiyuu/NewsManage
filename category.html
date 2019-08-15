@@ -145,7 +145,6 @@
     });
     //删除事件绑定
     //不能给[title=删除]的i标签直接绑定点击事件，因为页面中有多个i，会出错,需要父元素代理
-    //此事件只要获取id，传入后台即可实现，不用再选中相应的tr，将其remove()
     $('tbody').on('click', '[title=删除]', function() {
         deleteCategoryById($(this).attr('data_id'));
     });
