@@ -1,0 +1,330 @@
+<div>
+    <!-- 栏目管理 -->
+    <div class="category-manage">
+        <!-- 按钮组 -->
+        <div class="btns-div">
+            <button type="button" class="btn btn-success add-btn">新增</button>
+            <button type="button" class="btn btn-primary badelete-btn">批量删除</button>
+        </div>
+        <!-- 表格 -->
+        <div class="cate-table">
+            <table class="table table-bordered table-striped table-hover text-center">
+                <thead>
+                    <tr>
+                        <th class="text-center">编号</th>
+                        <th class="text-center">名称</th>
+                        <th class="text-center">父栏目</th>
+                        <th class="text-center">描述</th>
+                        <th class="text-center">操作</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <!-- 增加、修改模态框 -->
+        <div class="modal" id="add-update-modal" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span>&times;</span>
+                        </button>
+                        <h4 class="modal-title"></h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label for="name" class="col-md-2 control-label"> 栏目名称</label>
+                                <div class="col-md-10">
+                                    <input id="name" type="text" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="parent" class="col-sm-2 control-label">所属栏目</label>
+                                <div class="col-md-10">
+                                    <select id="parent" class="form-control"></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="comment" class="col-md-2 control-label"> 栏目描述</label>
+                                <div class="col-md-10">
+                                    <textarea id="comment" type="text" class="form-control">
+                                    </textarea>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button id="to-save" type="button" class="btn btn-primary">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 分页 -->
+        <div class="page">
+            <ul class="pagination"></ul>
+        </div>
+    </div>
+    <!--如果父栏目下有子栏目，那么父栏目就不能被删除，即使父栏目和子栏目同时被删除也不行-->
+    <!-- 以下为category的jQuery代码 -->
+    <script type="text/javascript">
+    //需要用到的数据
+    var state = {
+        //当前页数
+        currentPage: 1,
+        //总的数据个数
+        total: 0,
+        //每页个数
+        pageSize: 8,
+        //总页数
+        totalPage: 0,
+        //表格数据
+        tableData: [],
+        //表格总数据
+        tableTotalData: [],
+        //当前操作类型：新增或修改
+        option: '新增',
+        //当前点击的修改对象
+        currentObj: {}
+    };
+    //查询所有数据      
+    findAllCategory();
+    //点击模态框的保存
+    //区分新增和修改，修改的时候需要额外传递当前修改的对象的id
+    $('#to-save').click(function(event) {
+        //获取值
+        if ($("#name").val() && $("#comment").val()) {
+            var obj = {
+                name: $("#name").val(),
+                parentId: $("#parent").val(),
+                comment: $("#comment").val()
+            };
+            if (state.option == '编辑') {
+                obj.id = state.currentObj.id;
+            }
+            console.log('传递给后台的数据是：', obj);
+            // 提交数据给后台
+            saveOrUpdateCategory(obj);
+        } else {
+            alert('请输入完整的信息');
+        }
+    });
+    //新增事件绑定
+    $('.add-btn').click(function(event) {
+        // 设置option
+        state.option = '新增';
+        //设置模态框标题
+        $('.modal-title').text(state.option + '栏目信息');
+        //追加模态框的select
+        addOptionDOM();
+        // 清空表单数据，显示模态框
+        $('.modal [type=text]').val('');
+        $('#parent').val('');
+        $('#add-update-modal').modal('show');
+    });
+    //修改事件绑定
+    $('tbody').on('click', '[title=编辑]', function() {
+        state.option = '编辑';
+        //设置模态框标题
+        $('.modal-title').text(state.option + '栏目信息');
+        addOptionDOM();
+         //获取当前点击的元素的id
+         var id = $(this).attr('data_id');
+         //遍历数据，过滤出与当前选中对象id相同的对象，取出其属性值
+        var category = state.tableData.filter(function(item) {
+            return item.id == id;
+        })[0];
+        state.currentObj = category;
+        console.log(state.currentObj);
+        // 获取表单控件
+        $('#name').val(category.name);
+        $('#parent').val(category.parent ? category.parent.id : '');
+        $('#comment').val(category.comment);
+        $('#add-update-modal').modal('show');
+    });
+    //删除事件绑定
+    //不能给[title=删除]的i标签直接绑定点击事件，因为页面中有多个i，会出错,需要父元素代理
+    //此事件只要获取id，传入后台即可实现，不用再选中相应的tr，将其remove()
+    $('tbody').on('click', '[title=删除]', function() {
+        deleteCategoryById($(this).attr('data_id'));
+    });
+    //批量删除事件绑定
+    $('.badelete-btn').click(function(event) {
+        //获取用户选中的input
+        var checked = Array.from($('input[type=checkbox]:checked'));
+        if (checked.length > 0) {
+            var ids = checked.map(function(item, index) {
+                return $(item).attr('value');
+            });
+            batchDeleteCategory(ids);
+        } else {
+            alert('请选择要删除的数据');
+        }
+    });
+    //分页事件绑定
+    $('.pagination').on('click', 'li', function(event) {
+        //如果有禁用，直接返回
+        if ($(this).hasClass('disabled')) {
+            return;
+        }
+        //点击页码
+        if ($(this).hasClass('page-num')) {
+            state.currentPage = +($(this).text());
+            $('.pagination li').removeClass('active');
+            $(this).addClass('active');
+            if (state.currentPage == 1) {
+                $('.pagination li:first-child').addClass('disabled');
+            } else {
+                $('.pagination li:first-child').removeClass('disabled');
+            }
+            if (state.currentPage == state.totalPage) {
+                $('.pagination li:last-child').addClass('disabled');
+            } else {
+                $('.pagination li:last-child').removeClass('disabled');
+            }
+        }
+        //点击上一页
+        if ($(this).hasClass('prev')) {
+            state.currentPage -= 1;
+            //设置上一个li为选中状态
+            $('.pagination li').removeClass('active');
+            $('.pagination li').eq(state.currentPage).addClass('active');
+            if (state.currentPage == 1) {
+                $(this).addClass('disabled');
+            }
+            //只要当前页不是最后一页就需要去除下一页绑定的禁用类，这是当下一页禁用后，点击上一页再直接点击下一页而不点击页码时，若不消除禁用此时会出现问题
+            if (state.currentPage != state.totalPage) {
+                $('.pagination .next').removeClass('disabled');
+            }
+        }
+        //点击下一页
+        if ($(this).hasClass('next')) {
+            state.currentPage += 1;
+            // 设置上一个的li为选中状态
+            $('.pagination li').removeClass('active');
+            $('.pagination li').eq(state.currentPage).addClass('active');
+            if (state.currentPage == state.totalPage) {
+                $(this).addClass('disabled');
+            }
+            if (state.currentPage != 1) {
+                $('.pagination .prev').removeClass('disabled');
+            }
+        }
+        //访问数据，每点击一次li就需要访问相应页码的数据，此处实现页码和表格数据一一对应
+        state.tableData = state.tableTotalData.slice((state.currentPage - 1) * state.pageSize, state.currentPage * state.pageSize);
+        //追加节点
+        addTableDOM();
+    });
+    //获取栏目数据，此时就应该访问分页和表格数据并追加节点
+    function findAllCategory() {
+        //重置分页器
+        $('.pagination li').removeClass('active');
+        $('.pagination li.page-num:first-child').addClass('active');
+        $('.pagination li:first-child').addClass('disabled');
+        state.currentPage = 1;
+        state.tableData = [];
+        getAjax('/manager/category/findAllCategory', 'get', null, function(res) {
+            state.total = res.data ? res.data.length : 0;
+            state.totalPage = Math.ceil(state.total / state.pageSize);
+            state.tableTotalData = res.data ? res.data : [];
+            //追加分页数据
+            addPageDOM();
+            //追加表格数据
+            if (state.tableTotalData.length > 0) {
+                //获取数据的第几页的数据
+                state.tableData = state.tableTotalData.slice((state.currentPage - 1) * state.pageSize, state.currentPage * state.pageSize);
+            }
+            addTableDOM();
+        }, function(error) {
+            console.log(error);
+        });
+    }
+
+    //通过id删除栏目数据
+    function deleteCategoryById(id) {
+        getAjax('/manager/category/deleteCategoryById', 'get', { id: id },
+            function(res) {
+                if (res.status == 200) {
+                    alert('删除成功');
+                    findAllCategory();
+                }
+            },
+            function(error) {
+                console.log(error);
+            });
+    }
+    //批量删除栏目数据
+    //传入的ids为数组类型的数据，先将其转化为字符串，再用{}变为对象,因为调用的函数需传入的数据类型为对象类型
+    function batchDeleteCategory(ids) {
+        getAjax('/manager/category/batchDeleteCategory', 'post', { ids: ids.toString() },
+            function(res) {
+                if (res.status == 200) {
+                    alert('批量删除成功');
+                    findAllCategory();
+                }
+            },
+            function(error) {
+                console.log(error);
+            });
+    }
+    //保存数据
+    function saveOrUpdateCategory(obj) {
+        getAjax('/manager/category/saveOrUpdateCategory', 'post', obj,
+            function(res) {
+                if (res.status == 200) {
+                    console.log(res);
+                    // 提交成功的回调函数里，更新数据，关闭模态框。
+                    findAllCategory();
+                    $('#add-update-modal').modal('hide');
+                }
+            },
+            function(error) {
+                console.log(error);
+            });
+    }
+    //弹出模态框时给select处追加下拉列表DOM
+    function addOptionDOM() {
+        var optionStr = `<option value="">请选择</option>`;
+        $.each(state.tableTotalData, function() {
+            optionStr += `<option value="` + this.id + `">` + this.name + `</option>`;
+        });
+        $('#parent').html(optionStr);
+    }
+    //遍历当前页的数据，给其追加表格DOM
+    function addTableDOM() {
+        var str = '';
+        $.each(state.tableData, function() {
+            str += ` <tr>
+                            <td><input type="checkbox" value="` + this.id + `"/></td>
+                            <td>` + this.name + `</td>
+                            <td>` + (this.parent ? this.parent.name : '-') + `</td>
+                            <td>` + this.comment + `</td>                  
+                            <td>
+                                <i data_id="` + this.id + `" title="编辑" class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                                <i data_id="` + this.id + `"  title="删除" class="fa fa-trash-o" aria-hidden="true"></i>
+                            </td>
+                        </tr>`
+        });
+        $('tbody').html(str);
+    }
+    //追加分页DOM
+    function addPageDOM() {
+        var pageStr = `<li class="prev">
+              <a href="#">
+                <span>&laquo;</span>
+              </a>
+            </li>`;
+        for (var i = 0; i < state.totalPage; i++) {
+            pageStr += `<li class="page-num"><a href="#">` + (i + 1) + `</a></li>`;
+        }
+        pageStr += `<li class="next">
+              <a href="#">
+                <span>&raquo;</span>
+              </a>
+            </li>`;
+        $('.pagination').html(pageStr);
+        $('.pagination .page-num:first').addClass('active');
+    }
+    </script>
+</div>

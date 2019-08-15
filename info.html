@@ -1,0 +1,432 @@
+<!-- 资讯管理 -->
+<div>
+    <div class="info-manage">
+        <div class="info-action">
+            <form class="form-inline info-select">
+                <select class="form-control myselect"></select>
+            </form>
+            <button type="button" class="btn btn-success add-btn">新增</button>
+            <button type="button" class="btn btn-primary badelete-btn">批量删除</button>
+        </div>
+        <!-- 表格 -->
+        <div class="cate-table">
+            <table class="table table-bordered text-center table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th class="text-center">编号</th>
+                        <th class="text-center">文章标题</th>
+                        <th class="text-center">所属栏目</th>
+                        <th class="text-center">排列方式</th>
+                        <th class="text-center">作者</th>
+                        <th class="text-center">发布时间</th>
+                        <th class="text-center">阅读次数</th>
+                        <th class="text-center">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- <tr>
+                    <td class="text-center"><input type="checkbox"></td>
+                    <td class="text-center">133</td>
+                    <td class="text-center">li</td>
+                    <td class="text-center">style-one</td>
+                    <td class="text-center">-</td>
+                    <td class="text-center">2019-07-06 12:29:24</td>
+                    <td class="text-center">18</td>
+                    <td class="text-center">
+                        <i title="编辑" class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                        <i title="删除" class="fa fa-trash-o" aria-hidden="true"></i>
+                    </td>
+                </tr>
+                 -->
+                </tbody>
+            </table>
+        </div>
+        <!-- 分页 -->
+        <div class="page">
+            <ul class="pagination"></ul>
+        </div>
+        <!-- 增加、修改模态框 -->
+        <div class="modal" id="add-update-modal" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span>&times;</span>
+                        </button>
+                        <h4 class="modal-title"></h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label for="title" class="col-md-2 control-label"> 标题</label>
+                                <div class="col-md-10">
+                                    <input id="title" type="text" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="category" class="col-sm-2 control-label">所属栏目</label>
+                                <div class="col-md-10">
+                                    <select id="category" class="form-control"></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">列表样式</label>
+                                <div class="col-md-5">
+                                    <label for="style-one">
+                                        <input type="radio" id="style-one" name="liststyle" value="style-one">
+                                        <img src="./images/style-one.jpg" alt="">
+                                    </label>
+                                </div>
+                                <div class="col-md-5">
+                                    <label for="style-two">
+                                        <input type="radio" id="style-two" name="liststyle" value="style-two">
+                                        <img src="./images/style-two.jpg" alt="">
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="content" class="col-md-2 control-label"> 正文</label>
+                                <div class="col-md-10">
+                                    <textarea id="content" type="text" class="form-control">
+                                    </textarea>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button id="to-save" type="button" class="btn btn-primary">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    //需要用到的数据
+    var state = {
+        //当前页数
+        currentPage: 1,
+        //总的数据个数
+        total: 0,
+        //每页个数
+        pageSize: 8,
+        //总页数
+        totalPage: 0,
+        //表格数据
+        tableData: [],
+        //表格总数据，通过栏目id查找出来的所有文章
+        tableTotalData: [],
+        //所有的栏目信息
+        category: [],
+        //当前操作类型：新增或修改
+        option: '发布',
+        //当前点击的对象的id
+        currentId: '',
+        //当前info-action中select选中的栏目id
+        currentCId: '',
+        // 当前修改的对象
+        currentObj: {},
+    };
+    addCategory();
+    //当currentCId发生改变时，获取对应的栏目的文章信息
+    $('.myselect').change(function() {
+        state.currentCId = $(this).val();
+        findArticle(state.currentCId);
+    });
+    //分页事件绑定
+    $('.pagination').on('click', 'li', function(event) {
+        //如果有禁用，直接返回
+        if ($(this).hasClass('disabled')) {
+            return;
+        }
+        //点击页码
+        if ($(this).hasClass('page-num')) {
+            state.currentPage = +($(this).text());
+            $('.pagination li').removeClass('active');
+            $(this).addClass('active');
+            if (state.currentPage == 1) {
+                $('.pagination li:first-child').addClass('disabled');
+            } else {
+                $('.pagination li:first-child').removeClass('disabled');
+            }
+            if (state.currentPage == state.totalPage) {
+                $('.pagination li:last-child').addClass('disabled');
+            } else {
+                $('.pagination li:last-child').removeClass('disabled');
+            }
+        }
+        //点击上一页
+        if ($(this).hasClass('prev')) {
+            state.currentPage -= 1;
+            //设置上一个li为选中状态
+            $('.pagination li').removeClass('active');
+            $('.pagination li').eq(state.currentPage).addClass('active');
+            if (state.currentPage == 1) {
+                $(this).addClass('disabled');
+            }
+            //只要当前页不是最后一页就需要去除下一页绑定的禁用类，这是当下一页禁用后，点击上一页再直接点击下一页而不点击页码时，若不消除禁用此时会出现问题
+            if (state.currentPage != state.totalPage) {
+                $('.pagination .next').removeClass('disabled');
+            }
+        }
+        //点击下一页
+        if ($(this).hasClass('next')) {
+            state.currentPage += 1;
+            // 设置上一个的li为选中状态
+            $('.pagination li').removeClass('active');
+            $('.pagination li').eq(state.currentPage).addClass('active');
+            if (state.currentPage == state.totalPage) {
+                $(this).addClass('disabled');
+            }
+            if (state.currentPage != 1) {
+                $('.pagination .prev').removeClass('disabled');
+            }
+        }
+        //访问数据，每点击一次li就需要访问相应页码的数据，此处实现页码和表格数据一一对应
+        state.tableData = state.tableTotalData.slice((state.currentPage - 1) * state.pageSize, state.currentPage * state.pageSize);
+        //追加节点
+        addTableDOM();
+    });
+    //点击模态框的保存
+    //区分新增和修改，修改的时候需要额外传递当前修改的对象的id
+    $('#to-save').click(function(event) {
+        //获取值
+        var title = $('#title').val();
+        //当前模态框中select选中的栏目id,也即所属栏目的id
+        var categoryId = $('#category').val();
+        var liststyle = $('input[type=radio]:checked').val();
+        var content = $('#content').val();
+        console.log(title, categoryId, liststyle, content);
+        if (title && categoryId && liststyle && content) {
+            var obj = {
+                title: title,
+                categoryId: categoryId,
+                liststyle: liststyle,
+                content: content
+            };
+            if (state.option == '编辑') {
+                obj.id = state.currentObj.id;
+                obj.publishtime = parseDate();
+                obj.readtimes = state.currentObj.readtimes;
+            }
+            console.log('传递给后台的数据是：', obj);
+            // 提交数据给后台
+            saveOrUpdateArticle(obj);
+        } else {
+            alert('请输入完整的信息');
+        }
+    });
+    //新增事件绑定
+    $('.add-btn').click(function(event) {
+        // 设置option
+        state.option = '发布';
+        //设置模态框标题
+        $('.modal-title').text(state.option + '资讯');
+        //追加模态框的select
+        addOptionDOM();
+        // 清空表单数据，显示模态框
+        $('.modal [type=text]').val('');
+        $('input[type=radio]:checked').prop('checked', false);
+        //模态框中的select的值为.myselect的值
+        $('#category').val($('.myselect').val());
+        $('#add-update-modal').modal('show');
+    });
+    //修改事件绑定
+    $('tbody').on('click', '[title=编辑]', function() {
+        state.option = '编辑';
+        //设置模态框标题
+        $('.modal-title').text(state.option + '资讯');
+        addOptionDOM();
+        //获取当前点击的元素的id
+        var id = $(this).attr('data_id');
+        //遍历数据，如果当前id与遍历的id同，取出需要的属性值
+        var article = state.tableData.filter(function(item) {
+            return item.id == id;
+        })[0];
+        state.currentObj = article;
+        // 设置值
+        $('#title').val(article.title);
+        //模态框中的select的值为.myselect的值
+        $('#category').val($('.myselect').val());
+        $('input[value=' + article.liststyle + ']').prop('checked', true);
+        $('#content').val(article.content);
+        $('#add-update-modal').modal('show');
+    });
+    //通过id删除事件绑定
+    $('tbody').on('click', '[title=删除]', function() {
+        deleteArticleById($(this).attr('data_id'));
+    });
+    //批量删除事件绑定
+    $('.badelete-btn').click(function(event) {
+        //获取用户选中的input
+        var checked = Array.from($('input[type=checkbox]:checked'));
+        if (checked.length > 0) {
+            var ids = checked.map(function(item, index) {
+                return $(item).attr('value');
+            });
+            batchDeleteArticle(ids);
+        } else {
+            alert('请选择要删除的数据');
+        }
+    });
+
+    //获取所有栏目，追加节点到select中
+    function addCategory() {
+        getAjax('/manager/category/findAllCategory', 'get', null, function(res) {
+            state.category = res.data;
+            var option = '';
+            state.category.forEach(function(item) {
+                option += `<option value="` + item.id + `">` + item.name + `</option>`;
+            });
+            $('.info-select select').html(option);
+            state.currentCId = res.data[0].id;
+            //加载当前select中栏目id对应的文章信息,也是第一个
+            findArticle(state.currentCId);
+        }, function(error) {
+            console.log(error);
+        });
+    }
+    // 通过栏目id加载对应的文章信息
+    function findArticle(CId) {
+        /* //清空tbody中的内容
+         $('tbody').remove();*/
+        var obj = {
+            page: 0,
+            //会影响state.total的个数，比如若此处pageSize为2，即使总数据有6个，也只会显示两个，所以为了让数据全部展示出来，应该尽量大
+            pageSize: 100,
+            //当前select中栏目的id即currentCId
+            categoryId: CId
+        };
+        //重置分页器
+        $('.pagination li').removeClass('active');
+        $('.pagination li.page-num:first-child').addClass('active');
+        $('.pagination li:first-child').addClass('disabled');
+        state.currentPage = 1;
+        state.tableData = [];
+        getAjax('/manager/article/findArticle', 'get', obj, function(res) {
+            //console.log(res.data.list);
+            state.total = res.data ? res.data.list.length : 0;
+            state.totalPage = Math.ceil(state.total / state.pageSize);
+            state.tableTotalData = res.data ? res.data.list : [];
+            //追加分页数据
+            addPageDOM();
+            //追加表格数据
+            if (state.tableTotalData.length > 0) {
+                //获取数据的第几页的数据
+                state.tableData = state.tableTotalData.slice((state.currentPage - 1) * state.pageSize, state.currentPage * state.pageSize);
+            }
+            addTableDOM();
+        }, function(error) {
+            console.log(error);
+        });
+    }
+    //遍历当前页的数据，给其追加表格DOM
+    function addTableDOM() {
+        var str = '';
+        state.tableData.forEach(function(item) {
+            str += ` <tr>
+                            <td><input type="checkbox" value="` + item.id + `"/></td>
+                            <td>` + item.title + `</td>
+                            <td>` + (item.category ? item.category.name : '-') + `</td>
+                            <td>` + item.liststyle + `</td>   
+                            <td>` + (item.author ? item.author : '-') + `</td>
+                            <td>` + item.publishtime + `</td>
+                            <td>` + item.readtimes + `</td>         
+                            <td>
+                                <i data_id="` + item.id + `" title="编辑" class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                                <i data_id="` + item.id + `"  title="删除" class="fa fa-trash-o" aria-hidden="true"></i>
+                            </td>
+                        </tr>`;
+        });
+        $('tbody').html(str);
+    }
+    //追加分页DOM
+    function addPageDOM() {
+        var pageStr = `<li class="prev">
+              <a href="#">
+                <span>&laquo;</span>
+              </a>
+            </li>`;
+        for (var i = 0; i < state.totalPage; i++) {
+            pageStr += `<li class="page-num"><a href="#">` + (i + 1) + `</a></li>`;
+        }
+        pageStr += `<li class="next">
+              <a href="#">
+                <span>&raquo;</span>
+              </a>
+            </li>`;
+        $('.pagination').html(pageStr);
+        $('.pagination .page-num:first').addClass('active');
+    }
+    //追加模态框处所属栏目的option节点
+    function addOptionDOM() {
+        var optionStr = `<option value="">请选择</option>`;
+        state.category.forEach(function(item) {
+            optionStr += `<option value="` + item.id + `">` + item.name + `</option>`;
+        });
+        $('#category').html(optionStr);
+    }
+    //保存数据
+    function saveOrUpdateArticle(obj) {
+        getAjax('/manager/article/saveOrUpdateArticle', 'post', obj,
+            function(res) {
+                if (res.status == 200) {
+                    // 提交成功的回调函数里，更新数据，关闭模态框。
+                    findArticle(state.currentCId);
+                    $('#add-update-modal').modal('hide');
+                }
+            },
+            function(error) {
+                console.log(error);
+            });
+    }
+    //通过id删除栏目数据
+    function deleteArticleById(id) {
+        getAjax('/manager/article/deleteArticleById', 'get', { id: id },
+            function(res) {
+                if (res.status == 200) {
+                    alert('删除成功');
+                    findArticle(state.currentCId);
+                }
+            },
+            function(error) {
+                console.log(error);
+            });
+    }
+    //批量删除栏目数据
+    //传入的ids为数组类型的数据，先将其转化为字符串，再用{}变为对象,因为调用的函数需传入的数据类型为对象类型
+    function batchDeleteArticle(ids) {
+        getAjax('/manager/article/batchDeleteArticle', 'post', { ids: ids.toString() },
+            function(res) {
+                if (res.status == 200) {
+                    alert('批量删除成功');
+                    findArticle(state.currentCId);
+                }
+            },
+            function(error) {
+                console.log(error);
+            });
+    }
+    // 当前时间的函数,每进行一次修改，时间就会发生变化
+    function parseDate() {
+        var date = new Date();
+        console.log(date);
+        var year = date.getFullYear();
+        var month = date.getMonth() + 1;
+        month = addZero(month);
+        var day = date.getDate();
+        day = addZero(day);
+        var hours = date.getHours();
+        hours = addZero(hours);
+        var minutes = date.getMinutes();
+        minutes = addZero(minutes);
+        var seconds = date.getSeconds();
+        seconds = addZero(seconds);
+        return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+    }
+
+    function addZero(num) {
+        return num < 10 ? '0' + num : num;
+    }
+    </script>
+</div>

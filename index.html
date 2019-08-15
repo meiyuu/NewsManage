@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>资讯平台</title>
+	<link rel="stylesheet" href="./css/index.css">
+	<!-- 引入font-awesome 字体图标 -->
+	<link rel="stylesheet" href="./css/font-awesome-4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="./bootstrap-3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="./css/bootstrap-switch.min.css">
+	<!-- 引入jQuery -->
+	<script src="./js/jquery-3.4.1.min.js"></script>
+	<!-- 引入highcharts -->
+	<script src="./js/highcharts.js"></script>
+	<!-- 引入BootStrap -->
+	<script src="./bootstrap-3.3.7/js/bootstrap.min.js"></script>
+	<!-- 引入bootstrap-switch插件 -->
+	<script src="./js/bootstrap-switch.min.js"></script>
+	<!-- 引入外部js,在jQuery之后引入 -->
+	<script src="./js/index.js"></script>
+	<!-- 引入封装的ajax -->
+	<script src="./js/ajax.js"></script>
+</head>
+<body>
+	<header>
+		<div class="head-left">
+			<img src="./images/head-logo.jpg" alt="">
+			<span>网络资讯平台</span>
+		</div>
+		<div class="head-right">
+			<div class="hr-bell">
+				<i class="fa fa-bell-o" aria-hidden="true">
+					<span class="badge">4</span>
+				</i>
+				<span>消息</span>
+			</div>
+			<div class="hr-user">
+				<i class="fa fa-user-o" aria-hidden="true"></i>
+				<span>admin</span>
+			</div>
+			<div class="hr-exit">
+				<i class="fa fa-sign-out" aria-hidden="true"></i>
+				<span>退出</span>
+			</div>
+		</div>
+	</header>
+	<div class="kd-body">
+		<nav>
+			<ul>
+				<li>
+					<i class="fa fa-home" aria-hidden="true"></i>
+					<span class="fir">首页</span>
+					<i class="fa fa-angle-right" aria-hidden="true"></i>
+				</li>
+				<li>
+					<i class="fa fa-bars" aria-hidden="true"></i>
+					<span>栏目管理</span>
+					<i class="fa fa-angle-right" aria-hidden="true"></i>
+				</li>
+				<li>
+					<i class="fa fa-book" aria-hidden="true"></i>
+					<span>资讯管理</span>
+					<i class="fa fa-angle-right" aria-hidden="true"></i>
+				</li>
+				<li>
+					<i class="fa fa-user-circle-o" aria-hidden="true"></i>
+					<span>用户管理</span>
+					<i class="fa fa-angle-right" aria-hidden="true"></i>
+				</li>
+			</ul>
+		</nav>
+		<div class="content"></div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!-- 首页 -->
+<div>
+    <div class="home-manage">
+        <div class="home">
+            <div class="left">
+                <div class="total">
+                    <div class="bg-icon bg1">
+                        <i class="fa fa-cloud fa-2x" aria-hidden="true"></i>
+                    </div>
+                    <div class="data">
+                        <span>99.9%</span>
+                        <small>SERVER UPTIME</small>
+                    </div>
+                </div>
+                <div class="total">
+                    <div class="bg-icon bg2">
+                        <i class="fa fa-cloud fa-2x" aria-hidden="true"></i>
+                    </div>
+                    <div class="data">
+                        <span>99.9%</span>
+                        <small>SERVER UPTIME</small>
+                    </div>
+                </div>
+                <div class="total">
+                    <div class="bg-icon bg3">
+                        <i class="fa fa-cloud fa-2x" aria-hidden="true"></i>
+                    </div>
+                    <div class="data">
+                        <span>99.9%</span>
+                        <small>SERVER UPTIME</small>
+                    </div>
+                </div>
+            </div>
+            <div id="lineChart"></div>
+            <div class="right">
+                <div id="barChart"></div>
+                <div id="pieChart"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+    /* $(function() {              
+          
+                   //柱形图
+                   var chart = {
+                       type: 'column'
+                   };
+                   var title = {
+                       text: ' '
+                   };
+                   var xAxis = {
+                       categories: [],
+                       crosshair: true
+                   };
+                   var yAxis = {
+                       title: {
+                           text: ' '
+                       }
+                   };
+                   var plotOptions = {
+                       column: {
+                           pointPadding: 0.2,
+                           borderWidth: 0
+                       }
+                   };
+                   //取消右下角的版权标识
+                   var credits = {
+                       enabled: false
+                   };
+                   var series = [{
+                       name: 'uptime',
+                       data: [29.90, 71.50, 106.40, 129.20, 144.00, 176.00, 135.60, 148.50, 216.40, 194.10, 95.60, 54.40, 29.90, 71.50, 106.40, 129.20, 144.00, 176.00, 135.60]
+                   }];
+                  
+                 
+                 
+    /*Highcharts.setOptions({
+        credits:{
+            enabled:false;
+        }
+    });*/
+    var lineChart = Highcharts.chart('lineChart', {
+        title: {
+            text: 'Browse for details'
+        },
+        xAxis: {
+            categories: ['2010', '2011', '2012', '2013', '2014', '2015',
+                '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'
+            ]
+        },
+        yAxis: {
+            title: {
+                text: 'Number of people'
+            },
+            labels: {
+                formatter: function() {
+                    return this.value / 1000 + 'k';
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        colors:['#aaf','#faa'],
+        series: [{
+            name: 'PageViews',
+            data: [43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175, 43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175]
+        }, {
+            name: 'Visitor',
+            data: [24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434, 24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434]
+        }]
+    });
+    var barChart = Highcharts.chart('barChart', {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Percentage of visitors'
+        },
+        xAxis: {
+            categories: [],
+            crosshair: true,
+            labels:false
+        },
+        yAxis: {
+            title: {
+                text: ' '
+            },
+            tickInterval: 150,
+            labels: {
+                formatter: function() {
+                    return this.value + '%';
+                },
+            }
+        },
+        plotOptions: {
+            column: {
+                pointPadding: 0.2,
+                borderWidth: 0
+            }
+        },
+        //取消右下角的版权标识
+        credits: {
+            enabled: false
+        },
+        legend:{
+            enabled: false
+        },
+        colors:['#886CE9'],
+        series: [{
+            name: 'uptime',
+            data: [29.90, 71.50, 106.40, 129.20, 144.00, 176.00, 135.60, 148.50, 216.40, 194.10, 95.60, 54.40, 29.90, 71.50, 106.40, 129.20, 144.00, 176.00, 135.60]
+        }]
+    });
+    var pieChart = Highcharts.chart('pieChart', {
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false,
+        },
+        title: {
+            text: ' '
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    // format: '<b>{point.name}%</b>: {point.percentage:.1f} %',
+                    style: {
+                        color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                    }
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            type: 'pie',
+            name: 'Browser share',
+            innerSize: '50%',
+            data: [
+                ['Firefox', 45.0],
+                ['IE', 26.8],
+                {
+                    name: 'Chrome',
+                    y: 12.8,
+                    sliced: true,
+                    selected: true
+                },
+                ['Safari', 8.5],
+                ['Opera', 6.2],
+                ['Others', 0.7]
+            ]
+        }]
+    });
+    </script>
+</div>
