@@ -14,8 +14,8 @@
                 <thead>
                     <tr>
                         <th class="text-center">编号</th>
-                        <th class="text-center">文章标题</th>
-                        <th class="text-center">所属栏目</th>
+                        <th class="text-center">资讯标题</th>
+                        <th class="text-center">所属新闻类型</th>
                         <th class="text-center">排列方式</th>
                         <th class="text-center">作者</th>
                         <th class="text-center">发布时间</th>
@@ -49,7 +49,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="category" class="col-sm-2 control-label">所属栏目</label>
+                                <label for="category" class="col-sm-2 control-label">所属新闻类型</label>
                                 <div class="col-md-10">
                                     <select id="category" class="form-control"></select>
                                 </div>
@@ -99,19 +99,21 @@
         totalPage: 0,
         //表格数据
         tableData: [],
-        //表格总数据，通过栏目id查找出来的所有文章
+        //表格总数据
         tableTotalData: [],
-        //所有的栏目信息
+        //所有的新闻类型信息
         category: [],
         //当前操作类型：新增或修改
         option: '发布',
+        //当前点击的对象的id
+        currentId: '',
         //当前info-action中select选中的栏目id
         currentCId: '',
         // 当前修改的对象
         currentObj: {},
     };
     addCategory();
-    //当currentCId发生改变时，获取对应的栏目的文章信息
+    //当currentCId发生改变时，获取对应新闻类型的资讯信息
     $('.myselect').change(function() {
         state.currentCId = $(this).val();
         findArticle(state.currentCId);
@@ -147,7 +149,6 @@
             if (state.currentPage == 1) {
                 $(this).addClass('disabled');
             }
-            //只要当前页不是最后一页就需要去除下一页绑定的禁用类，这是当下一页禁用后，点击上一页再直接点击下一页而不点击页码时，若不消除禁用此时会出现问题
             if (state.currentPage != state.totalPage) {
                 $('.pagination .next').removeClass('disabled');
             }
@@ -155,7 +156,7 @@
         //点击下一页
         if ($(this).hasClass('next')) {
             state.currentPage += 1;
-            // 设置上一个的li为选中状态
+            // 设置下一个的li为选中状态
             $('.pagination li').removeClass('active');
             $('.pagination li').eq(state.currentPage).addClass('active');
             if (state.currentPage == state.totalPage) {
@@ -175,7 +176,7 @@
     $('#to-save').click(function(event) {
         //获取值
         var title = $('#title').val();
-        //当前模态框中select选中的栏目id,也即所属栏目的id
+        //当前模态框中select选中的所属新闻类型的id
         var categoryId = $('#category').val();
         var liststyle = $('input[type=radio]:checked').val();
         var content = $('#content').val();
@@ -252,8 +253,7 @@
             alert('请选择要删除的数据');
         }
     });
-
-    //获取所有栏目，追加节点到select中
+    //获取所有新闻类型，追加节点到select中
     function addCategory() {
         getAjax('/manager/category/findAllCategory', 'get', null, function(res) {
             state.category = res.data;
@@ -261,19 +261,20 @@
             state.category.forEach(function(item) {
                 option += `<option value="` + item.id + `">` + item.name + `</option>`;
             });
-            $('.info-select select').html(option);
+            $('.myselect').html(option);
             state.currentCId = res.data[0].id;
-            //加载当前select中栏目id对应的文章信息,也是第一个
+            //加载当前select中对应的资讯信息,也是第一个
             findArticle(state.currentCId);
         }, function(error) {
             console.log(error);
         });
     }
-    // 通过栏目id加载对应的文章信息
+    // 通过新闻类型id加载对应的资讯信息
     function findArticle(CId) {
         var obj = {
+            //页数，每次渲染从第一页开始
             page: 0,
-            //会影响state.total的个数，比如若此处pageSize为2，即使总数据有6个，也只会显示两个，所以为了让数据全部展示出来，应该尽量大
+            //TODO
             pageSize: 100,
             //当前select中栏目的id即currentCId
             categoryId: CId
@@ -361,7 +362,7 @@
                 console.log(error);
             });
     }
-    //通过id删除栏目数据
+    //通过id删除数据
     function deleteArticleById(id) {
         getAjax('/manager/article/deleteArticleById', 'get', { id: id },
             function(res) {
@@ -374,8 +375,7 @@
                 console.log(error);
             });
     }
-    //批量删除栏目数据
-    //传入的ids为数组类型的数据，先将其转化为字符串，再用{}变为对象,因为调用的函数需传入的数据类型为对象类型
+    //批量删除数据
     function batchDeleteArticle(ids) {
         getAjax('/manager/article/batchDeleteArticle', 'post', { ids: ids.toString() },
             function(res) {
@@ -388,7 +388,7 @@
                 console.log(error);
             });
     }
-    // 当前时间的函数,每进行一次修改，时间就会发生变化
+    //返回当前时间的函数,每进行一次修改，时间就会发生变化
     function parseDate() {
         var date = new Date();
         console.log(date);
@@ -405,7 +405,6 @@
         seconds = addZero(seconds);
         return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
     }
-
     function addZero(num) {
         return num < 10 ? '0' + num : num;
     }

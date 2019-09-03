@@ -6,13 +6,13 @@ $(function(){
 				// 加载页面
 				$('.content').load('home.html');
 				break;
-			case '栏目管理':
-				$('.content').load('category.html');
+			case '分类管理':
+				$('.content').load('news.html');
 				break;
 			case '资讯管理':
 				$('.content').load('info.html');
 				break;
-			case '用户管理':
+			case '控制管理':
 				$('.content').load('user.html');
 				break;
 			default:

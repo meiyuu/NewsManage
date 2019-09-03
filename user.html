@@ -1,4 +1,4 @@
-<!-- 用户管理 -->
+<!-- 用户控制管理 -->
 <div class="user-manage">
     <div class="btns-div">
         <button type="button" class="btn btn-success">新增</button>
@@ -104,15 +104,6 @@ $(document).ready(function() {
             changeStatus(obj);
         }
     },'[type="checkbox"]');
-     $('.mySwitch input').on({'switchChange.bootstrapSwitch':function(event, state) {
-            var id = $(this).closest('.switch').prev('input').val();
-            var obj = {
-                id: id,
-                status: state
-            };      
-            changeStatus(obj);
-        }
-    });
     findAllUser();
     //查询所有用户
     function findAllUser() {

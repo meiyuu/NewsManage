@@ -1,5 +1,5 @@
 <div>
-    <!-- 栏目管理 -->
+    <!-- 分类管理 -->
     <div class="category-manage">
         <!-- 按钮组 -->
         <div class="btns-div">
@@ -12,8 +12,8 @@
                 <thead>
                     <tr>
                         <th class="text-center">编号</th>
-                        <th class="text-center">名称</th>
-                        <th class="text-center">父栏目</th>
+                        <th class="text-center">新闻类型</th>
+                        <th class="text-center">所属类型</th>
                         <th class="text-center">描述</th>
                         <th class="text-center">操作</th>
                     </tr>
@@ -34,19 +34,19 @@
                     <div class="modal-body">
                         <form class="form-horizontal">
                             <div class="form-group">
-                                <label for="name" class="col-md-2 control-label"> 栏目名称</label>
+                                <label for="name" class="col-md-2 control-label"> 新闻类型</label>
                                 <div class="col-md-10">
                                     <input id="name" type="text" class="form-control">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="parent" class="col-sm-2 control-label">所属栏目</label>
+                                <label for="parent" class="col-sm-2 control-label">所属类型</label>
                                 <div class="col-md-10">
                                     <select id="parent" class="form-control"></select>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="comment" class="col-md-2 control-label"> 栏目描述</label>
+                                <label for="comment" class="col-md-2 control-label"> 新闻描述</label>
                                 <div class="col-md-10">
                                     <textarea id="comment" type="text" class="form-control">
                                     </textarea>
@@ -66,8 +66,7 @@
             <ul class="pagination"></ul>
         </div>
     </div>
-    <!--如果父栏目下有子栏目，那么父栏目就不能被删除，即使父栏目和子栏目同时被删除也不行-->
-    <!-- 以下为category的jQuery代码 -->
+    <!-- 以下为新闻分类管理的jQuery代码 -->
     <script type="text/javascript">
     //需要用到的数据
     var state = {
@@ -115,7 +114,7 @@
         // 设置option
         state.option = '新增';
         //设置模态框标题
-        $('.modal-title').text(state.option + '栏目信息');
+        $('.modal-title').text(state.option + '新闻信息');
         //追加模态框的select
         addOptionDOM();
         // 清空表单数据，显示模态框
@@ -127,7 +126,7 @@
     $('tbody').on('click', '[title=编辑]', function() {
         state.option = '编辑';
         //设置模态框标题
-        $('.modal-title').text(state.option + '栏目信息');
+        $('.modal-title').text(state.option + '新闻信息');
         addOptionDOM();
          //获取当前点击的元素的id
          var id = $(this).attr('data_id');
@@ -144,7 +143,6 @@
         $('#add-update-modal').modal('show');
     });
     //删除事件绑定
-    //不能给[title=删除]的i标签直接绑定点击事件，因为页面中有多个i，会出错,需要父元素代理
     $('tbody').on('click', '[title=删除]', function() {
         deleteCategoryById($(this).attr('data_id'));
     });
@@ -215,7 +213,7 @@
         //追加节点
         addTableDOM();
     });
-    //获取栏目数据，此时就应该访问分页和表格数据并追加节点
+    //获取数据，此时访问分页和表格数据并追加节点
     function findAllCategory() {
         //重置分页器
         $('.pagination li').removeClass('active');
@@ -240,7 +238,7 @@
         });
     }
 
-    //通过id删除栏目数据
+    //通过id删除数据
     function deleteCategoryById(id) {
         getAjax('/manager/category/deleteCategoryById', 'get', { id: id },
             function(res) {
@@ -253,7 +251,7 @@
                 console.log(error);
             });
     }
-    //批量删除栏目数据
+    //批量删除数据
     //传入的ids为数组类型的数据，先将其转化为字符串，再用{}变为对象,因为调用的函数需传入的数据类型为对象类型
     function batchDeleteCategory(ids) {
         getAjax('/manager/category/batchDeleteCategory', 'post', { ids: ids.toString() },
