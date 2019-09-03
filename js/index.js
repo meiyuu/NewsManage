@@ -12,7 +12,7 @@ $(function(){
 			case '资讯管理':
 				$('.content').load('info.html');
 				break;
-			case '控制管理':
+			case '用户管理':
 				$('.content').load('user.html');
 				break;
 			default:
